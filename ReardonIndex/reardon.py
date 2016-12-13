@@ -101,6 +101,9 @@ def ordinal_seg(df: pd.DataFrame, unit_var: str, ord_var: str, sort=True) -> pd.
         assert (segregation_index >= 0. and segregation_index <= 1.)
 
         reardon_index[key] = segregation_index
+        reardon_index["Vg_" + key] = v_pop
+
+    reardon_index["N_g"] = num_total
 
     return pd.Series(reardon_index)
 
