@@ -27,7 +27,7 @@ def s_sq_root(mat):
     return 2 * np.sqrt(mat * (1 - mat))
 
 
-def ordinal_seg(df: pd.DataFrame, unit_var: str, ord_var: str) -> pd.Series:
+def ordinal_seg(df: pd.DataFrame, unit_var: str, ord_var: str, sort=True) -> pd.Series:
     """
     Calculates the three types of Reardon's Ordinal Segregation Index
 
@@ -52,8 +52,9 @@ def ordinal_seg(df: pd.DataFrame, unit_var: str, ord_var: str) -> pd.Series:
     #
     """
 
-    df = (df[[unit_var, ord_var]].dropna(how='any')
-            .sort_values(by=[unit_var, ord_var]) )
+    df = df[[unit_var, ord_var]].dropna(how='any')
+    if sort:
+        df = df.sort_values(by=[unit_var, ord_var])
 
     num_Cats = df[ord_var].unique().size
     num_per_unit = df.groupby(unit_var).count().values.ravel()
@@ -135,4 +136,4 @@ def ordinal_seg_per_group(df: pd.DataFrame, unit_var: str, ord_var: str, group_v
     df = (df[[unit_var, ord_var, group_var]].dropna(how='any')
           .sort_values(by=[group_var, unit_var, ord_var]))
 
-    return df.groupby(group_var).apply(ordinal_seg, unit_var=unit_var, ord_var=ord_var)
+    return df.groupby(group_var).apply(ordinal_seg, unit_var=unit_var, ord_var=ord_var, sort=False)
