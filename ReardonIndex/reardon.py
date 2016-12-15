@@ -26,6 +26,9 @@ def r_variation(mat):
 def s_sq_root(mat):
     return 2 * np.sqrt(mat * (1 - mat))
 
+index_dict = {'information': h_info, 'variation': r_variation,
+                  'sq_root': s_sq_root}
+
 
 def ordinal_seg(df: pd.DataFrame, unit_var: str, ord_var: str, sort=True) -> pd.Series:
     """
@@ -74,9 +77,6 @@ def ordinal_seg(df: pd.DataFrame, unit_var: str, ord_var: str, sort=True) -> pd.
     # Delete last category (it's always 1)
     cum_dist = cum_dist.iloc[:, :(num_Cats - 1)]
 
-    index_dict = {'information': h_info, 'variation': r_variation,
-                  'sq_root': s_sq_root}
-
     #3. Iterate over each index function
     reardon_index = {}
 
@@ -113,7 +113,7 @@ def ordinal_seg_per_group(df: pd.DataFrame, unit_var: str, ord_var: str, group_v
     Calculates the three types of Reardon's Ordinal Segregation Index per "super" group
 
     The input dataset at the minimum should contain:
-    + an administrative or unit variable (such as schools or firms)
+    + an administrative or unit variable (such as schools or firms). Unit ID should be unique across groups!
     + an ordered variable/category (such as income levels for students or education levels for workers)
     + a group variable that contains several administrative units. Example: school districs or cities
 
@@ -140,3 +140,39 @@ def ordinal_seg_per_group(df: pd.DataFrame, unit_var: str, ord_var: str, group_v
           .sort_values(by=[group_var, unit_var, ord_var]))
 
     return df.groupby(group_var).apply(ordinal_seg, unit_var=unit_var, ord_var=ord_var, sort=False)
+
+
+def decomposition(df: pd.DataFrame, unit_var: str, ord_var: str, group_var: str):
+    """
+
+    Decomposes the segregation indices into between and within
+
+    Parameters
+    ----------
+    df
+    unit_var
+    ord_var
+    group_var
+
+    Returns
+    -------
+    dict with between, within and total segregation for the three segregation indices
+    """
+    bigN = len(df)
+    decomp = {}
+
+    overall_Series = ordinal_seg(df, unit_var=unit_var, ord_var=ord_var)
+    between_Series = ordinal_seg(df, unit_var=group_var, ord_var=ord_var)
+    within_df = ordinal_seg_per_group(df, unit_var='rbd', ord_var="cat", group_var="group")
+
+    for key in index_dict:
+        decomp['between_' + key] = between_Series[key]
+
+        decomp['total' + key] = overall_Series[key]
+
+        # Within part
+        t_times_V = bigN * overall_Series["Vg_" + key]
+        sum_over_groups = (within_df.N_g * within_df['Vg_' + key] * within_df[key]).sum()
+        decomp['within_' + key] = sum_over_groups / t_times_V
+
+    return decomp

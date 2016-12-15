@@ -12,7 +12,7 @@ expected = {'info1': 0.123308074,
           'variation2': 0.038903061,
           'variation1B': 0.194979716}
 
-
+index_names = ['information', 'variation', 'sq_root']
 
 
 def test_no_subgroups():
@@ -47,3 +47,37 @@ def test_subgroupbsb():
     result = rdon.ordinal_seg_per_group(df_B, unit_var='rbd', ord_var='cat', group_var='group')
 
     assert np.allclose(result['variation'], [expected['variation1B'], expected['variation2']])
+
+def test_decomposition():
+    """
+    For any dataset, the within variation + between variation should equal total variation
+    """
+    df1B = pd.read_csv(os.path.join("tests", "distr1B.csv"))
+    df2 = pd.read_csv(os.path.join("tests", "distr2.csv"))
+    df_B = pd.concat([df1B, df2])
+
+    expected_dec = {'within_variation': 0.121517339,
+            'between_variation': 0.004138663,
+                    'totalvariation': 0.125656002}
+
+    decomp_d = rdon.decomposition(df_B, unit_var='rbd', ord_var="cat", group_var="group")
+
+    for key in ['between_variation', 'totalvariation', 'within_variation']:
+        actual_value, expected_value = decomp_d[key], expected_dec[key]
+        assert np.allclose(actual_value, expected_value)
+
+
+def test_decomposition_random_df():
+    """
+    Tests the decomposition for a random df
+    """
+    # df = get_random_df()
+    pass
+
+
+    # for ind in index_names:
+    #     total = 0.
+    #     between = 0.
+    #     within = 0.
+    #     assert np.allclose(between + within, total)
+
