@@ -163,7 +163,7 @@ def decomposition(df: pd.DataFrame, unit_var: str, ord_var: str, group_var: str)
 
     overall_Series = ordinal_seg(df, unit_var=unit_var, ord_var=ord_var)
     between_Series = ordinal_seg(df, unit_var=group_var, ord_var=ord_var)
-    within_df = ordinal_seg_per_group(df, unit_var='rbd', ord_var="cat", group_var="group")
+    within_df = ordinal_seg_per_group(df, unit_var=unit_var, ord_var=ord_var, group_var=group_var)
 
     for key in index_dict:
         decomp['between_' + key] = between_Series[key]
