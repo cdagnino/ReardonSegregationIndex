@@ -71,13 +71,10 @@ def test_decomposition_random_df():
     """
     Tests the decomposition for a random df
     """
-    # df = get_random_df()
-    pass
-
-
-    # for ind in index_names:
-    #     total = 0.
-    #     between = 0.
-    #     within = 0.
-    #     assert np.allclose(between + within, total)
-
+    df = rdon.random_multilevel_df()
+    decomp = rdon.decomposition(df, unit_var='unit', ord_var='cat', group_var='group')
+    for ind in index_names:
+        total = decomp['total'+ind]
+        between = decomp['between_'+ind]
+        within = decomp['within_'+ind]
+        assert np.allclose(between + within, total)

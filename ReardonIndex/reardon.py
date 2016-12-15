@@ -176,3 +176,36 @@ def decomposition(df: pd.DataFrame, unit_var: str, ord_var: str, group_var: str)
         decomp['within_' + key] = sum_over_groups / t_times_V
 
     return decomp
+
+
+#### Utilities
+
+def random_multilevel_df(max_n=80, max_n_groups=5, max_n_cats=4):
+    """
+    Simulates a random dataframe with individuals.
+    The (administrative) units belong to a single (super)group.
+    The individuals belong to both a category and an administrative unit
+
+    Returns
+    ------
+
+    dataframe with 'unit', 'cat' and 'group' columns
+    """
+    n = np.random.randint(60, high=max_n)
+    n_groups = np.random.randint(2, high=max_n_groups)
+    n_cats = np.random.randint(2, high=max_n_cats)
+    n_units = np.random.randint(n_groups, high=n_groups * 3)
+
+    # Assign units to groups
+    unit_to_group = (pd.Series(np.random.randint(0, high=n_groups, size=n_units))
+                     .to_frame(name="group"))
+    # Assign individuals to units and cats
+    d = {}
+    d['unit'] = np.random.randint(0, high=n_units, size=n)
+    d['cat'] = np.random.randint(0, high=n_cats, size=n)
+    df = pd.DataFrame(d)
+    # Merge
+    df = pd.merge(df, unit_to_group,
+                  left_on='unit', right_index=True)
+    # Merge
+    return df
