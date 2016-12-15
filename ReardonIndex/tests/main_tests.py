@@ -5,11 +5,14 @@ import numpy as np
 import ReardonIndex as rdon
 import os
 
-#### Calculated by hand
+#### Calculated by hand in Reardon test.xlsx
 expected = {'info1': 0.123308074,
           'variation1': 0.154655612,
           'info2': 0.029847988,
-          'variation2': 0.038903061}
+          'variation2': 0.038903061,
+          'variation1B': 0.194979716}
+
+
 
 
 def test_no_subgroups():
@@ -33,3 +36,14 @@ def test_subgroups():
     assert np.allclose(result['information'], [expected['info1'], expected['info2']])
     assert np.allclose(result['variation'], [expected['variation1'], expected['variation2']])
 
+def test_subgroupbsb():
+    """
+    Test with unequal number of groups
+    """
+    df1B = pd.read_csv(os.path.join("tests", "distr1B.csv"))
+    df2 = pd.read_csv(os.path.join("tests", "distr2.csv"))
+    df_B = pd.concat([df1B, df2])
+
+    result = rdon.ordinal_seg_per_group(df_B, unit_var='rbd', ord_var='cat', group_var='group')
+
+    assert np.allclose(result['variation'], [expected['variation1B'], expected['variation2']])
